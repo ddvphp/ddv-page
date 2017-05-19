@@ -8,6 +8,7 @@ class DdvPage {
   protected $flagPageLists = true;
   protected $listsArray = null;
   protected $pageArray = array();
+  protected static $pageColumns = array('now', 'count', 'size', 'end', 'isEnd', 'isInputPage');
   public function __construct($obj)
   {
     // 初始化
@@ -117,16 +118,23 @@ class DdvPage {
     $r = array($this->pageArray['limitStart'], $this->pageArray['size']);
     return $r ;
   }
-  public function getPage($columns = array()){
-    if (empty($columns)) {
+  public function getPage($pageColumns = null){
+    $pageColumns = empty($pageColumns) && (!is_array($pageColumns)) ? self::$pageColumns : $pageColumns;
+    if (empty($pageColumns)) {
       return $this->pageArray;
     }else{
       $r = array();
-      foreach ($columns as $index => $key) {
+      foreach ($pageColumns as $index => $key) {
         $r[$key] = $this->pageArray[$key];
       }
       return $r;
     }
+  }
+  public function pageColumns($pageColumns = null){
+    self::$pageColumns = empty($pageColumns) ? array() : $pageColumns;
+  }
+  public static function setPageColumns($pageColumns = null){
+    self::$pageColumns = empty($pageColumns) ? array() : $pageColumns;
   }
   public function setup($flag=null){
     $this->flagPageLists = is_null($flag) ? $this->flagPageLists : $flag;
@@ -201,10 +209,20 @@ class DdvPage {
     $c['is_end'] = &$c['isEnd'];
     $c['is_input_page'] = &$c['isInputPage'];
   }
-  public function toArray(){
+  public function toArray($pageColumns = null){
+    $page = array();
+    $pageColumns = empty($pageColumns) && (!is_array($pageColumns)) ? self::$pageColumns : $pageColumns;
+    if (empty($pageColumns)) {
+      $page = $this->pageArray;
+    }else{
+      $page = array();
+      foreach ($pageColumns as $index => $key) {
+        $page[$key] = $this->pageArray[$key];
+      }
+    }
     return array(
-        'lists'=>$this->listsArray,
-        'page'=>$this->pageArray
+      'lists'=>$this->listsArray,
+      'page'=>$page
     );
   }
   /**
