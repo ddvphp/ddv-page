@@ -18,7 +18,7 @@ Usage - 使用
 
 
 ```php
-$page = new DdvPhp/DdvPage();
+$page = new /DdvPhp/DdvPage();
 $pc = array();
 //传入当前的页数
 $pc['now'] = $page_now;
