@@ -2,7 +2,6 @@
 	"name": "ddvphp/ddv-page",
 	"description": "ddv-page php library",
 	"version": "0.0.1",
-	"minimum-stability":"beta",
 	"require": {
 		"php": ">=5.3"
 	},
