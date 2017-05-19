@@ -13,6 +13,30 @@ Usage - 使用
 
 ## 1、laravel framework Usage[laravel 框架 使用]
 
+```php
+
+$data = \App\Model\UploadBaseModel::where('file_id','<',70);
+
+return json_encode(new \DdvPhp\DdvPage($data));
+
+```
+
+```php
+
+$data = \App\Model\UploadBaseModel::where('file_id','<',70);
+
+return json_encode(new \DdvPhp\DdvPage($data, true));
+
+```
+
+```php
+$pageSize = 20 ; //每页条数
+
+$data = \App\Model\UploadBaseModel::where('file_id','<',70)->paginate($pageSize, $columns, 'pageNow', $pageNow);
+
+return json_encode(new \DdvPhp\DdvPage($data));
+
+```
 
 ## 2、CodeIgniter framework Usage[CodeIgniter 框架 使用]
 
