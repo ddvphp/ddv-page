@@ -9,8 +9,17 @@ class DdvPage {
   protected $listsArray = null;
   protected $pageArray = array();
   protected static $pageColumns = array('now', 'count', 'size', 'end', 'isEnd', 'isInputPage');
+  public static function create(){
+    $className =  get_called_class();
+    $page = new $className(false);
+    call_user_func_array(array($page, '__construct'), func_get_args());
+    return $page;
+  }
   public function __construct($obj)
   {
+    if($obj===false){
+      return;
+    }
     // 初始化
     is_array($obj) ? call_user_func_array(array($this, 'init'), func_get_args()) : $this->init(array());
     // 如果是一个对象
