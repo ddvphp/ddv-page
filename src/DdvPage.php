@@ -52,7 +52,7 @@ class DdvPage {
   }
   public function DatabaseBuilderInit($obj, $pageSize = null, $columns = ['*'], $pageNow = null)
   {
-    if (empty($pageSize)) {
+    if ($pageSize===false) {
       $this->pageArray = null;
       $this->listsArray = $obj->get($columns);
     }else{
