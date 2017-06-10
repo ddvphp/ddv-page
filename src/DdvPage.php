@@ -6,6 +6,7 @@ use const null;
 
 class DdvPage {
   protected $flagPageLists = true;
+  protected static $listsArrayDefault = array();
   protected $listsArray = array();
   protected $pageArray = array();
   protected static $pageColumns = array('now', 'count', 'size', 'end', 'isEnd', 'isInputPage');
@@ -17,6 +18,7 @@ class DdvPage {
   }
   public function __construct($obj)
   {
+    $this->listsArray = self::$listsArrayDefault;
     if($obj===false){
       return;
     }
@@ -145,6 +147,14 @@ class DdvPage {
   public static function setPageColumns($pageColumns = null){
     self::$pageColumns = empty($pageColumns) ? array() : $pageColumns;
   }
+  public function listsArrayDefault($listsArrayDefault)
+  {
+    self::$listsArrayDefault = $listsArrayDefault;
+  }
+  public static function setListsArrayDefault($listsArrayDefault)
+  {
+    self::$listsArrayDefault = $listsArrayDefault;
+  }
   public function setup($flag=null){
     $this->flagPageLists = is_null($flag) ? $this->flagPageLists : $flag;
     $c = &$this->pageArray;
@@ -257,9 +267,5 @@ class DdvPage {
   public function __toString()
   {
     return json_encode($this->toArray());
-  }
-  public function listsArrayDefault($listsArray)
-  {
-    $this->listsArray = $listsArray;
   }
 }
