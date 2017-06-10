@@ -6,7 +6,7 @@ use const null;
 
 class DdvPage {
   protected $flagPageLists = true;
-  protected $listsArray = null;
+  protected $listsArray = array();
   protected $pageArray = array();
   protected static $pageColumns = array('now', 'count', 'size', 'end', 'isEnd', 'isInputPage');
   public static function create(){
@@ -257,5 +257,9 @@ class DdvPage {
   public function __toString()
   {
     return json_encode($this->toArray());
+  }
+  public function listsArrayDefault($listsArray)
+  {
+    $this->listsArray = $listsArray;
   }
 }
