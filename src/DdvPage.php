@@ -42,7 +42,7 @@ class DdvPage {
    */
   public function initByObj($obj)
   {
-    if (!is_a($obj)){
+    if (!is_object($obj)){
       return;
     }elseif (class_exists('Illuminate\Pagination\LengthAwarePaginator') && $obj instanceof \Illuminate\Pagination\LengthAwarePaginator){
       // 如果是 分页对象
