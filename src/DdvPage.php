@@ -42,23 +42,14 @@ class DdvPage {
    */
   public function initByObj($obj)
   {
-    $className = get_class($obj);
-    switch ($className) {
+    if (!is_a($obj)){
+      return;
+    }elseif (class_exists('Illuminate\Pagination\LengthAwarePaginator') && $obj instanceof \Illuminate\Pagination\LengthAwarePaginator){
       // 如果是 分页对象
-      case 'Illuminate\Pagination\LengthAwarePaginator':
-        if (class_exists('Illuminate\Pagination\LengthAwarePaginator')) {
-          call_user_func_array(array($this, 'LengthAwarePaginatorInit'), func_get_args());
-        }
-        break;
-      // 如果是 数据库模型对象
-      case 'Illuminate\Database\Eloquent\Builder':
-        if (class_exists('Illuminate\Database\Eloquent\Builder')) {
-          call_user_func_array(array($this, 'DatabaseBuilderInit'), func_get_args());
-        }
-        break;
-
-      default:
-        break;
+      call_user_func_array(array($obj, 'LengthAwarePaginatorInit'), func_get_args());
+    }elseif (class_exists('Illuminate\Database\Eloquent\Builder') && $obj instanceof \Illuminate\Database\Eloquent\Builder){
+       // 如果是 数据库模型对象
+       call_user_func_array(array($obj, 'DatabaseBuilderInit'), func_get_args());
     }
   }
   /**
