@@ -55,10 +55,10 @@ class DdvPage {
   /**
    * 设置保存数据 驼峰自动转小写下划线
    * @param \Illuminate\Database\Eloquent\Builder $obj   [数据库对象模型]
-   * @param Number|Boolean|Null $pageSize [分页每页大小]
-   * @param Array  $columns [筛选字段]
-   * @param nt|Null  $pageNow [读取第几页]
-   * @param Array $data [需要保存的数组]
+   * @param int|boolean|null $pageSize [分页每页大小]
+   * @param array  $columns [筛选字段]
+   * @param int|null  $pageNow [读取第几页]
+   * @param array $data [需要保存的数组]
    * @return \Illuminate\Database\Eloquent\Model $this [请求对象]
    */
   public function DatabaseBuilderInit($obj, $pageSize = null, $columns = ['*'], $pageNow = null)
@@ -92,7 +92,7 @@ class DdvPage {
   }
   /**
   * 初始化
-  * @param Array  $params [配置]
+  * @param array  $params [配置]
   * @return \DdvPhp\DdvPage $page [分页对象]
   */
   public function init($params = array(),$flag=null)
