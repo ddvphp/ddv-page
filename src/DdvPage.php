@@ -1,7 +1,5 @@
 <?php
-
 namespace DdvPhp;
-use const null;
 
 
 class DdvPage {
@@ -10,12 +8,21 @@ class DdvPage {
   protected $listsArray = array();
   protected $pageArray = array();
   protected static $pageColumns = array('now', 'count', 'size', 'end', 'isEnd', 'isInputPage');
-  public static function create(){
+  /**
+   * 实例化一个DdvPage对象
+   * @param \Illuminate\Pagination\LengthAwarePaginator|\Illuminate\Database\Eloquent\Builder|false $obj   [数据库对象模型]
+   * @return \DdvPhp\DdvPage $page [分页对象]
+   */
+  public static function create($obj = false){
     $className =  get_called_class();
     $page = new $className(false);
     call_user_func_array(array($page, '__construct'), func_get_args());
     return $page;
   }
+  /**
+   * 构造函数
+   * @param \Illuminate\Pagination\LengthAwarePaginator|\Illuminate\Database\Eloquent\Builder|false $obj   [数据库对象模型]
+   */
   public function __construct($obj)
   {
     $this->listsArray = self::$listsArrayDefault;
@@ -29,6 +36,10 @@ class DdvPage {
       call_user_func_array(array($this, 'initByObj'), func_get_args());
     }
   }
+  /**
+   * 通过对象来初始化
+   * @param \Illuminate\Pagination\LengthAwarePaginator|\Illuminate\Database\Eloquent\Builder $obj   [数据库对象模型]
+   */
   public function initByObj($obj)
   {
     $className = get_class($obj);
@@ -50,6 +61,15 @@ class DdvPage {
         break;
     }
   }
+  /**
+   * 设置保存数据 驼峰自动转小写下划线
+   * @param \Illuminate\Database\Eloquent\Builder $obj   [数据库对象模型]
+   * @param Number|Boolean|Null $pageSize [分页每页大小]
+   * @param Array  $columns [筛选字段]
+   * @param nt|Null  $pageNow [读取第几页]
+   * @param Array $data [需要保存的数组]
+   * @return \Illuminate\Database\Eloquent\Model $this [请求对象]
+   */
   public function DatabaseBuilderInit($obj, $pageSize = null, $columns = ['*'], $pageNow = null)
   {
     if ($pageSize===false) {
@@ -61,6 +81,10 @@ class DdvPage {
       $this->LengthAwarePaginatorInit($obj->paginate($pageSize, $columns, 'pageNow', $pageNow));
     }
   }
+  /**
+   * 设置保存数据 驼峰自动转小写下划线
+   * @param \Illuminate\Pagination\LengthAwarePaginator $obj [分页对象]
+   */
   public function LengthAwarePaginatorInit($obj)
   {
     $this->pageArray['now'] = intval($obj->currentPage());
@@ -75,6 +99,11 @@ class DdvPage {
     $this->listsArray = empty($lists) ? $this->listsArray : $lists;
     return;
   }
+  /**
+  * 初始化
+  * @param Array  $params [配置]
+  * @return \DdvPhp\DdvPage $page [分页对象]
+  */
   public function init($params = array(),$flag=null)
   {
     $this->pageArray = array_merge($this->pageArray, array(
