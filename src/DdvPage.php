@@ -46,10 +46,11 @@ class DdvPage {
       return;
     }elseif (class_exists('Illuminate\Pagination\LengthAwarePaginator') && $obj instanceof \Illuminate\Pagination\LengthAwarePaginator){
       // 如果是 分页对象
-      call_user_func_array(array($obj, 'LengthAwarePaginatorInit'), func_get_args());
+      call_user_func_array(array($this, 'LengthAwarePaginatorInit'), func_get_args());
     }elseif (class_exists('Illuminate\Database\Eloquent\Builder') && $obj instanceof \Illuminate\Database\Eloquent\Builder){
        // 如果是 数据库模型对象
-       call_user_func_array(array($obj, 'DatabaseBuilderInit'), func_get_args());
+
+        call_user_func_array(array($this, 'DatabaseBuilderInit'), func_get_args());
     }
   }
   /**
