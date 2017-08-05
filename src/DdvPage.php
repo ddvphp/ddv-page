@@ -1,7 +1,11 @@
 <?php
 namespace DdvPhp;
+// 字符串转换库
+use \DdvPhp\DdvUtil\String\Conversion;
 
-
+/**
+ * @mixin \DdvPhp\DdvPageStatic
+ */
 class DdvPage {
   protected $flagPageLists = true;
   protected static $listsArrayDefault = array();
@@ -22,12 +26,13 @@ class DdvPage {
   /**
    * 构造函数
    * @param \Illuminate\Pagination\LengthAwarePaginator|\Illuminate\Database\Eloquent\Builder|false $obj   [数据库对象模型]
+   * @return \DdvPhp\DdvPage $page [分页对象]
    */
   public function __construct($obj)
   {
     $this->listsArray = self::$listsArrayDefault;
     if($obj===false){
-      return;
+      return $this;
     }
     // 初始化
     is_array($obj) ? call_user_func_array(array($this, 'init'), func_get_args()) : $this->init(array());
@@ -35,23 +40,25 @@ class DdvPage {
     if(is_object($obj)){
       call_user_func_array(array($this, 'initByObj'), func_get_args());
     }
+    return $this;
   }
   /**
    * 通过对象来初始化
    * @param \Illuminate\Pagination\LengthAwarePaginator|\Illuminate\Database\Eloquent\Builder $obj   [数据库对象模型]
+   * @return \DdvPhp\DdvPage $page [分页对象]
    */
   public function initByObj($obj)
   {
     if (!is_object($obj)){
-      return;
+      return $this;
     }elseif (class_exists('Illuminate\Pagination\LengthAwarePaginator') && $obj instanceof \Illuminate\Pagination\LengthAwarePaginator){
       // 如果是 分页对象
       call_user_func_array(array($this, 'LengthAwarePaginatorInit'), func_get_args());
     }elseif (class_exists('Illuminate\Database\Eloquent\Builder') && $obj instanceof \Illuminate\Database\Eloquent\Builder){
        // 如果是 数据库模型对象
-
         call_user_func_array(array($this, 'DatabaseBuilderInit'), func_get_args());
     }
+    return $this;
   }
   /**
    * 设置保存数据 驼峰自动转小写下划线
@@ -60,7 +67,7 @@ class DdvPage {
    * @param array  $columns [筛选字段]
    * @param int|null  $pageNow [读取第几页]
    * @param array $data [需要保存的数组]
-   * @return \Illuminate\Database\Eloquent\Model $this [请求对象]
+   * @return \DdvPhp\DdvPage $page [分页对象]
    */
   public function DatabaseBuilderInit($obj, $pageSize = null, $columns = ['*'], $pageNow = null)
   {
@@ -72,10 +79,12 @@ class DdvPage {
       $pageSize = empty($pageSize) || $pageSize === true ? $this->pageArray['size'] : intval($pageSize);
       $this->LengthAwarePaginatorInit($obj->paginate($pageSize, $columns, 'pageNow', $pageNow));
     }
+    return $this;
   }
   /**
    * 设置保存数据 驼峰自动转小写下划线
    * @param \Illuminate\Pagination\LengthAwarePaginator $obj [分页对象]
+   * @return \DdvPhp\DdvPage $page [分页对象]
    */
   public function LengthAwarePaginatorInit($obj)
   {
@@ -89,7 +98,7 @@ class DdvPage {
       $lists[$index] = $item->toArray();
     }
     $this->listsArray = empty($lists) ? $this->listsArray : $lists;
-    return;
+    return $this;
   }
   /**
   * 初始化
@@ -146,10 +155,19 @@ class DdvPage {
     $this->setup($flag);
     return $this;
   }
+  /**
+   * 获取sql的偏移和长度[limit]
+   * @return array $limit [分页对象]
+   */
   public function getLimit(){
     $r = array($this->pageArray['limitStart'], $this->pageArray['size']);
     return $r ;
   }
+  /**
+   * 获取分页数据[limit]
+   * @param array|null  $pageColumns [分页数字字段]
+   * @return array $limit [分页字段]
+   */
   public function getPage($pageColumns = null){
     $pageColumns = empty($pageColumns) && (!is_array($pageColumns)) ? self::$pageColumns : $pageColumns;
     if (empty($pageColumns)) {
@@ -162,17 +180,15 @@ class DdvPage {
       return $r;
     }
   }
-  public function pageColumns($pageColumns = null){
+  /**
+   * 设定分页字段数组[limit]
+   * @param array|null  $pageColumns [分页数字字段]
+   * @return \DdvPhp\DdvPage $page [分页对象]
+   */
+  public static function setPageColumnsByStatic($pageColumns = null){
     self::$pageColumns = empty($pageColumns) ? array() : $pageColumns;
   }
-  public static function setPageColumns($pageColumns = null){
-    self::$pageColumns = empty($pageColumns) ? array() : $pageColumns;
-  }
-  public function listsArrayDefault($listsArrayDefault)
-  {
-    self::$listsArrayDefault = $listsArrayDefault;
-  }
-  public static function setListsArrayDefault($listsArrayDefault)
+  public static function setListsArrayDefaultStatic($listsArrayDefault)
   {
     self::$listsArrayDefault = $listsArrayDefault;
   }
@@ -249,6 +265,26 @@ class DdvPage {
     $c['is_end'] = &$c['isEnd'];
     $c['is_input_page'] = &$c['isInputPage'];
   }
+  /**
+   * 获取分页数据和数据库数据[自动转驼峰]
+   * @param array|null  $pageColumns [分页数字字段]
+   * @return array $res [分页数据和查询数据]
+   */
+  public function toHumpArray($pageColumns = null){
+      $res = $this->toArray();
+      if (!empty($res['lists'])) {
+          $res['lists'] = Conversion::underlineToHumpByIndexArray($res['lists']);
+      }
+      if (!empty($res['page'])) {
+          $res['page'] = Conversion::underlineToHumpByIndexArray($res['page']);
+      }
+      return $res;
+  }
+  /**
+   * 获取分页数据和数据库数据
+   * @param array|null  $pageColumns [分页数字字段]
+   * @return array $res [分页数据和查询数据]
+   */
   public function toArray($pageColumns = null){
     $page = array();
     $pageColumns = empty($pageColumns) && (!is_array($pageColumns)) ? self::$pageColumns : $pageColumns;
@@ -285,8 +321,65 @@ class DdvPage {
   {
     return json_encode($this->jsonSerialize(), $options);
   }
+  /**
+   * Convert the object to its JSON representation.
+   *
+   * @param  int  $options
+   * @return string
+   */
   public function __toString()
   {
-    return json_encode($this->toArray());
+    return $this->toJson();
   }
+  /**
+   * Handle dynamic method calls into the model.
+   *
+   * @param  string  $method
+   * @param  array  $parameters
+   * @return mixed
+   */
+  public function __call($method, $parameters)
+  {
+    if ($method === 'setListsArrayDefault') {
+      self::setListsArrayDefaultStatic(...$parameters);
+    } elseif ($method === 'setPageColumns') {
+      self::setPageColumnsByStatic(...$parameters);
+    }else{
+        throw new \DdvPhp\DdvUtil\Exception('Not Method', 'NOT_METHOD');
+    }
+    return $this;
+  }
+  /**
+   * Handle dynamic static method calls into the method.
+   *
+   * @param  string  $method
+   * @param  array  $parameters
+   * @return mixed
+   */
+  public static function __callStatic($method, $parameters)
+  {
+    if ($method === 'setListsArrayDefault') {
+      self::setListsArrayDefaultStatic(...$parameters);
+    } elseif ($method === 'setPageColumns') {
+      self::setPageColumnsByStatic(...$parameters);
+    }else{
+      throw new \DdvPhp\DdvUtil\Exception('Not Method', 'NOT_METHOD');
+    }
+
+  }
+}
+class DdvPageStatic{
+
+    public static function setListsArrayDefault($listsArrayDefault)
+    {
+        self::setListsArrayDefaultStatic($listsArrayDefault);
+    }
+    /**
+     * 设定分页字段数组[limit]
+     * @param array|null  $pageColumns [分页数字字段]
+     * @return \DdvPhp\DdvPage $page [分页对象]
+     */
+    public static function setPageColumns($pageColumns = null){
+        self::setPageColumnsByStatic($pageColumns);
+    }
 }
