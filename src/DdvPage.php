@@ -9,7 +9,7 @@ use \DdvPhp\DdvUtil\String\Conversion;
 class DdvPage {
   protected $flagPageLists = true;
   protected static $listsArrayDefault = array();
-  protected $listsArray = array();
+  protected $lists = null;
   protected $pageArray = array();
   protected static $pageColumns = array('now', 'count', 'size', 'end', 'isEnd', 'isInputPage');
   /**
@@ -30,7 +30,7 @@ class DdvPage {
    */
   public function __construct($obj)
   {
-    $this->listsArray = self::$listsArrayDefault;
+    $this->lists = self::$listsArrayDefault;
     if($obj===false){
       return $this;
     }
@@ -73,7 +73,7 @@ class DdvPage {
   {
     if ($pageSize===false) {
       $this->pageArray = null;
-      $this->listsArray = $obj->get($columns);
+      $this->lists = $obj->get($columns);
     }else{
       $pageNow = empty($pageNow) ? $this->pageArray['inputPage'] : intval($pageNow);
       $pageSize = empty($pageSize) || $pageSize === true ? $this->pageArray['size'] : intval($pageSize);
@@ -95,9 +95,9 @@ class DdvPage {
     $this->setup();
     $lists = array();
     foreach ($obj->items() as $index => $item) {
-      $lists[$index] = $item->toArray();
+      $lists[$index] = $item;
     }
-    $this->listsArray = empty($lists) ? $this->listsArray : $lists;
+    $this->lists = empty($lists) ? $this->lists : $lists;
     return $this;
   }
   /**
@@ -296,8 +296,18 @@ class DdvPage {
         $page[$key] = $this->pageArray[$key];
       }
     }
+    $lists = $this->lists;
+    if (is_object($lists)&&method_exists($lists, 'toArray')){
+        $lists = $lists->toArray();
+    } elseif (is_array($lists)){
+      foreach ($lists as $index => $value){
+        if (is_object($value)&&method_exists($value, 'toArray')){
+          $lists[$index] = $value->toArray();
+        }
+      }
+    }
     return array(
-      'lists'=>$this->listsArray,
+      'lists'=>$lists,
       'page'=>$page
     );
   }
