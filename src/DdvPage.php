@@ -285,31 +285,42 @@ class DdvPage {
    * @param array|null  $pageColumns [分页数字字段]
    * @return array $res [分页数据和查询数据]
    */
-  public function toArray($pageColumns = null){
-    $page = array();
-    $pageColumns = empty($pageColumns) && (!is_array($pageColumns)) ? self::$pageColumns : $pageColumns;
-    if (empty($pageColumns)) {
-      $page = $this->pageArray;
-    }else{
+  public function getRes($pageColumns = null){
       $page = array();
-      foreach ($pageColumns as $index => $key) {
-        $page[$key] = $this->pageArray[$key];
+      $pageColumns = empty($pageColumns) && (!is_array($pageColumns)) ? self::$pageColumns : $pageColumns;
+      if (empty($pageColumns)) {
+          $page = $this->pageArray;
+      }else{
+          $page = array();
+          foreach ($pageColumns as $index => $key) {
+              $page[$key] = $this->pageArray[$key];
+          }
       }
-    }
-    $lists = $this->lists;
-    if (is_object($lists)&&method_exists($lists, 'toArray')){
-        $lists = $lists->toArray();
-    } elseif (is_array($lists)){
-      foreach ($lists as $index => $value){
-        if (is_object($value)&&method_exists($value, 'toArray')){
-          $lists[$index] = $value->toArray();
-        }
+      $lists = empty($this->lists)?array():$this->lists;
+      return array(
+          'lists'=>$lists,
+          'page'=>$page
+      );
+  }
+  /**
+   * 获取分页数据和数据库数据
+   * @param array|null  $pageColumns [分页数字字段]
+   * @return array $res [分页数据和查询数据]
+   */
+  public function toArray($pageColumns = null){
+      $res = $this->getRes();
+
+      $lists = &$res['lists'];
+      if (is_object($lists)&&method_exists($lists, 'toArray')){
+          $lists = $lists->toArray();
+      } elseif (is_array($lists)){
+          foreach ($lists as $index => $value){
+              if (is_object($value)&&method_exists($value, 'toArray')){
+                  $lists[$index] = $value->toArray();
+              }
+          }
       }
-    }
-    return array(
-      'lists'=>$lists,
-      'page'=>$page
-    );
+      return $res;
   }
   /**
    * Convert the object into something JSON serializable.
