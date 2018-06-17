@@ -284,6 +284,16 @@ class DdvPage {
       }
       return $this;
   }
+  public function mapLists($fn){
+      if ($fn instanceof Closure || $fn instanceof \Closure){
+          if(is_array($this->lists) || is_object($this->lists)){
+              foreach ($this->lists as $key => $item){
+                  $fn($item, $key);
+              }
+          }
+      }
+      return $this;
+  }
   /**
    * 获取分页数据和数据库数据[自动转驼峰]
    * @param array|null  $pageColumns [分页数字字段]
