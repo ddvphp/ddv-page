@@ -11,7 +11,8 @@ class DdvPage {
   protected static $listsArrayDefault = array();
   protected $lists = null;
   protected $pageArray = array();
-  protected static $pageColumns = array('now', 'count', 'size', 'end', 'isEnd', 'isInputPage');
+  protected static $pageColumns = array('now', 'count', 'size', 'end', 'is_end', 'is_input_page');
+  protected $pageColumnsRes = array();
   /**
    * 实例化一个DdvPage对象
    * @param \Illuminate\Pagination\LengthAwarePaginator|\Illuminate\Database\Eloquent\Builder|false $obj   [数据库对象模型]
@@ -31,6 +32,7 @@ class DdvPage {
   public function __construct($obj)
   {
     $this->lists = self::$listsArrayDefault;
+    $this->pageColumnsRes = self::$pageColumns;
     if($obj===false){
       return $this;
     }
@@ -165,7 +167,7 @@ class DdvPage {
    * @return array $limit [分页字段]
    */
   public function getPage($pageColumns = null){
-    $pageColumns = empty($pageColumns) && (!is_array($pageColumns)) ? self::$pageColumns : $pageColumns;
+    $pageColumns = empty($pageColumns) && (!is_array($pageColumns)) ? $this->pageColumnsRes : $pageColumns;
     if (empty($pageColumns)) {
       return $this->pageArray;
     }else{
@@ -267,8 +269,8 @@ class DdvPage {
    * @return $this [分页数据和查询数据]
    */
   public function toHump(){
-      if (!empty($res['page'])) {
-          $res['page'] = Conversion::underlineToHumpByIndexArray($res['page']);
+      foreach ($this->pageColumnsRes as $key => $value){
+        $this->pageColumnsRes[$key] = Conversion::underlineToHump($value);
       }
       if (empty($this->lists)){
           return $this;
@@ -309,7 +311,7 @@ class DdvPage {
    */
   public function getRes($pageColumns = null){
       $page = array();
-      $pageColumns = empty($pageColumns) && (!is_array($pageColumns)) ? self::$pageColumns : $pageColumns;
+      $pageColumns = empty($pageColumns) && (!is_array($pageColumns)) ? $this->pageColumnsRes : $pageColumns;
       if (empty($pageColumns)) {
           $page = $this->pageArray;
       }else{
