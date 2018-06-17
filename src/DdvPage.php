@@ -37,7 +37,7 @@ class DdvPage {
     // 初始化
     is_array($obj) ? call_user_func_array(array($this, 'init'), func_get_args()) : $this->init(array());
     // 如果是一个对象
-    if(is_object($obj)){
+    if (is_object($obj)) {
       call_user_func_array(array($this, 'initByObj'), func_get_args());
     }
     return $this;
@@ -93,11 +93,7 @@ class DdvPage {
     $this->pageArray['size'] = intval($obj->perPage());
     $this->pageArray['end'] = intval($obj->lastPage());
     $this->setup();
-    $lists = array();
-    foreach ($obj->items() as $index => $item) {
-      $lists[$index] = $item;
-    }
-    $this->lists = empty($lists) ? $this->lists : $lists;
+    $this->lists = $obj->getCollection();
     return $this;
   }
   /**
@@ -268,17 +264,33 @@ class DdvPage {
   /**
    * 获取分页数据和数据库数据[自动转驼峰]
    * @param array|null  $pageColumns [分页数字字段]
-   * @return array $res [分页数据和查询数据]
+   * @return $this [分页数据和查询数据]
    */
-  public function toHumpArray($pageColumns = null){
-      $res = $this->toArray();
-      if (!empty($res['lists'])) {
-          $res['lists'] = Conversion::underlineToHumpByIndexArray($res['lists']);
-      }
+  public function toHump(){
       if (!empty($res['page'])) {
           $res['page'] = Conversion::underlineToHumpByIndexArray($res['page']);
       }
-      return $res;
+      if (empty($this->lists)){
+          return $this;
+      }
+      if (is_array($this->lists)){
+          $this->lists = Conversion::underlineToHumpByIndexArray($this->lists);
+      }elseif(is_object($this->lists)){
+          foreach ($this->lists as $key => $item){
+              if (is_object($item) && method_exists($item, 'toHump')){
+                  $this->lists[$key] = $item->toHump();
+              }
+          }
+      }
+      return $this;
+  }
+  /**
+   * 获取分页数据和数据库数据[自动转驼峰]
+   * @param array|null  $pageColumns [分页数字字段]
+   * @return array $res [分页数据和查询数据]
+   */
+  public function toHumpArray($pageColumns = null){
+      return $this->toHump()->toArray($pageColumns);
   }
   /**
    * 获取分页数据和数据库数据
@@ -308,7 +320,7 @@ class DdvPage {
    * @return array $res [分页数据和查询数据]
    */
   public function toArray($pageColumns = null){
-      $res = $this->getRes();
+      $res = $this->getRes($pageColumns);
 
       $lists = &$res['lists'];
       if (is_object($lists)&&method_exists($lists, 'toArray')){
