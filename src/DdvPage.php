@@ -291,6 +291,7 @@ class DdvPage {
           if(is_array($this->lists) || is_object($this->lists)){
               foreach ($this->lists as $key => $item){
                   $fn($item, $key);
+                  $this->lists[$key] = $item;
               }
           }
       }
